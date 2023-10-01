@@ -3,6 +3,9 @@ version: '${project.version}'
 main: komok.org.example.mazetour.MazeTour
 api-version: '1.20'
 commands:
-  start:
+  boatrace:
     description: Старт
-    permission: mazefun.start
+    permission: mazefun.boatrace
+  world:
+    description: Действие с миром
+    permission: mazefun.world

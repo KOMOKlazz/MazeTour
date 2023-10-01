@@ -11,11 +11,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class startCommand implements CommandExecutor {
+public class boatRaceStartCommand implements CommandExecutor {
     private Plugin plugin = MazeTour.getInstance();
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-        Bukkit.broadcastMessage(ChatColor.YELLOW + "Первое испытание начнется через 30 секунд!");
+        Bukkit.broadcastMessage(ChatColor.YELLOW + "Другое испытание начнется через 30 секунд!");
         Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
             int time = 0;
             @Override

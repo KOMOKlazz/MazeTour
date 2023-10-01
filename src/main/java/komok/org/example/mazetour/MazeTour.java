@@ -15,7 +15,8 @@ public final class MazeTour extends JavaPlugin implements Listener {
     }
     @Override
     public void onEnable() {
-        getCommand("start").setExecutor(new startCommand());
+        getCommand("start").setExecutor(new boatRaceStartCommand());
+        getCommand("world").setExecutor(new worldCommand());
         getServer().getPluginManager().registerEvents(this, this);
         System.out.println("MazeTour был запущен!");
     }
