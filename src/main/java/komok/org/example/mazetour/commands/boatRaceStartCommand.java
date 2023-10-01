@@ -21,10 +21,10 @@ public class boatRaceStartCommand implements CommandExecutor {
             @Override
             public void run() {
                 switch (time) {
-                    case 20:
-                        Bukkit.broadcastMessage(ChatColor.YELLOW + "Перемещение на другое испытание через 10 секунд!");
-                        break;
-                    case 30:
+//                    case 20:
+//                        Bukkit.broadcastMessage(ChatColor.YELLOW + "Перемещение на другое испытание через 10 секунд!");
+//                        break;
+                    case 0:
                         World world = (World) Bukkit.getServer().getWorld("world");
                         Location location =  new Location(world, 1500, 63, 0);
                         for (Player player: Bukkit.getOnlinePlayers()) {
