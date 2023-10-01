@@ -1,0 +1,4 @@
+name: MazeTour
+version: '${project.version}'
+main: komok.org.example.mazetour.MazeTour
+api-version: '1.20'
