@@ -6,6 +6,9 @@ commands:
   boatrace:
     description: Гонка на лодках
     permission: mazefun.boatrace
+  candywar:
+    description: Конфетные войны
+    permission: mazefun.candywar
   world:
     description: Действие с миром
     permission: mazefun.world
