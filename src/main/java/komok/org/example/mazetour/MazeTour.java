@@ -15,10 +15,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerChatEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -48,18 +45,31 @@ public final class MazeTour extends JavaPlugin implements Listener {
         System.out.println("MazeTour был остановлен!");
     }
 
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = (Player) event.getPlayer();
+        if (candyWarStartCommand.isRun()) {
+            player.setGameMode(GameMode.SPECTATOR);
+            Location location = new Location(getWorld("world"), 3000, 80, 0);
+            player.teleport(location);
+        }
+        else {
+            player.setGameMode(GameMode.ADVENTURE);
+            player.sendMessage(ChatColor.GOLD + "Добро пожаловать на хеллоуинский турнир 2023!");
+            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
+        }
+    }
+
     //CANDY WAR →
 
     @EventHandler
     public void onPlayerDoubleJump(PlayerToggleFlightEvent event) {
         Player player = (Player) event.getPlayer();
-        Bukkit.broadcastMessage("1");
         if (player.getGameMode() != GameMode.CREATIVE) {
             event.setCancelled(true);
             Block block = player.getWorld().getBlockAt(player.getLocation().subtract(0, 2, 0));
-            Bukkit.broadcastMessage("2");
             if (!block.getType().equals(Material.AIR)) {
-                Vector vector = player.getLocation().getDirection().multiply(1).setY(1);
+                Vector vector = player.getLocation().getDirection().multiply(1.5).setY(1);
                 player.setVelocity(vector);
             }
         }
@@ -72,11 +82,9 @@ public final class MazeTour extends JavaPlugin implements Listener {
 
         if(event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)){
             if(player.getItemInHand().getType() == Material.FEATHER){
-                Bukkit.broadcastMessage("1");
                 if (player.getGameMode() != GameMode.CREATIVE) {
                     event.setCancelled(true);
                     Block block = player.getWorld().getBlockAt(player.getLocation().subtract(0, 2, 0));
-                    Bukkit.broadcastMessage("2");
                     if (!block.getType().equals(Material.AIR)) {
                         Vector vector = player.getLocation().getDirection().multiply(1.5).setY(1);
                         player.setVelocity(vector);
@@ -194,5 +202,9 @@ public final class MazeTour extends JavaPlugin implements Listener {
                 event.setCancelled(true);
             }
         }
+    }
+
+    public World getWorld(String name) {
+        return ((World) Bukkit.getServer().getWorld(name));
     }
 }
