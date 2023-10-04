@@ -32,8 +32,8 @@ public final class MazeTour extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         getCommand("boatrace").setExecutor(new boatRaceCommand());
-        getCommand("candywar").setExecutor(new candyWarCommand());
-        getCommand("canfywar").setTabCompleter(new candyWarCompliter());
+        getCommand("candywars").setExecutor(new candyWarCommand());
+        getCommand("candywars").setTabCompleter(new candyWarCompliter());
         getCommand("world").setExecutor(new worldCommand());
         getServer().getPluginManager().registerEvents(this, this);
         System.out.println("MazeTour был запущен!");
@@ -119,8 +119,7 @@ public final class MazeTour extends JavaPlugin implements Listener {
 
     @EventHandler (priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
-//        if (event.getCurrentItem().getType() == )
-        event.setCancelled(true);
+        if (candyWarCommand.isRun()) {event.setCancelled(true);}
     }
 
     @EventHandler
@@ -209,7 +208,7 @@ public final class MazeTour extends JavaPlugin implements Listener {
         }
     }
 
-    public World getWorld(String name) {
+    public static World getWorld(String name) {
         return ((World) Bukkit.getServer().getWorld(name));
     }
 }
