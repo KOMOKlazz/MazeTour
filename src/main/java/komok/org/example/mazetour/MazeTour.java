@@ -3,7 +3,6 @@ package komok.org.example.mazetour;
 import komok.org.example.mazetour.commands.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,7 +12,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
@@ -33,8 +31,9 @@ public final class MazeTour extends JavaPlugin implements Listener {
     }
     @Override
     public void onEnable() {
-        getCommand("boatrace").setExecutor(new boatRaceStartCommand());
-        getCommand("candywar").setExecutor(new candyWarStartCommand());
+        getCommand("boatrace").setExecutor(new boatRaceCommand());
+        getCommand("candywar").setExecutor(new candyWarCommand());
+        getCommand("canfywar").setTabCompleter(new candyWarCompliter());
         getCommand("world").setExecutor(new worldCommand());
         getServer().getPluginManager().registerEvents(this, this);
         System.out.println("MazeTour был запущен!");
@@ -48,7 +47,7 @@ public final class MazeTour extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = (Player) event.getPlayer();
-        if (candyWarStartCommand.isRun()) {
+        if (candyWarCommand.isRun()) {
             player.setGameMode(GameMode.SPECTATOR);
             Location location = new Location(getWorld("world"), 3000, 80, 0);
             player.teleport(location);
@@ -58,6 +57,12 @@ public final class MazeTour extends JavaPlugin implements Listener {
             player.sendMessage(ChatColor.GOLD + "Добро пожаловать на хеллоуинский турнир 2023!");
             player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
         }
+        event.setJoinMessage(null);
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        event.setQuitMessage(null);
     }
 
     //CANDY WAR →
@@ -77,7 +82,7 @@ public final class MazeTour extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerUse(PlayerInteractEvent event){
-        if (!candyWarStartCommand.isRun()) {return;}
+        if (!candyWarCommand.isRun()) {return;}
         Player player = event.getPlayer();
 
         if(event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)){

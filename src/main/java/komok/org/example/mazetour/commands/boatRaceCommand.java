@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class boatRaceStartCommand implements CommandExecutor {
+public class boatRaceCommand implements CommandExecutor {
     private Plugin plugin = MazeTour.getInstance();
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
