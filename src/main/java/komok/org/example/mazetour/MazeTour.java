@@ -8,14 +8,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
@@ -36,12 +34,12 @@ public final class MazeTour extends JavaPlugin implements Listener {
         getCommand("candywars").setTabCompleter(new candyWarCompliter());
         getCommand("world").setExecutor(new worldCommand());
         getServer().getPluginManager().registerEvents(this, this);
-        System.out.println("MazeTour был запущен!");
+        System.out.println(ChatColor.RED + "MazeTour launched!");
     }
 
     @Override
     public void onDisable() {
-        System.out.println("MazeTour был остановлен!");
+        System.out.println("MazeTour stopped!");
     }
 
     @EventHandler
@@ -123,53 +121,99 @@ public final class MazeTour extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void entityDeathEvent(EntityDeathEvent event) {
-        Bukkit.broadcastMessage(ChatColor.YELLOW + "ENTITY DEATH");
-        event.setDroppedExp(0);
-        for (Object itemStack: event.getDrops().toArray()) {
-            event.getDrops().remove(itemStack);
-        }
+    public void entityDamageEvent(EntityDamageEvent event) {
         Entity entity = event.getEntity();
-        if(entity.getLastDamageCause().getCause().equals(EntityDamageEvent.DamageCause.ENTITY_EXPLOSION)) {
-            if (entity instanceof Player) {
-                Player taker = event.getEntity().getKiller();
-                Player shooter = event.getEntity().getKiller();
-                onPlayerExploded(taker, shooter);
-                return;
+        if (entity instanceof LivingEntity && !(entity instanceof Player)) {
+            LivingEntity livingEntity = (LivingEntity) entity;
+            if (event.getDamage() > livingEntity.getHealth()) {
+                Firework firework = (Firework) entity.getWorld().spawn(entity.getLocation(), Firework.class);
+                FireworkMeta fireworkMeta = firework.getFireworkMeta();
+                fireworkMeta.addEffect(FireworkEffect.builder()
+                        .flicker(false)
+                        .trail(true)
+                        .with(FireworkEffect.Type.BALL)
+                        .with(FireworkEffect.Type.BALL_LARGE)
+                        .with(FireworkEffect.Type.STAR)
+                        .withColor(Color.YELLOW)
+                        .withColor(Color.ORANGE)
+                        .withFade(Color.RED)
+                        .withFade(Color.PURPLE)
+                        .build());
+                fireworkMeta.setPower(0);
+                firework.setFireworkMeta(fireworkMeta);
+                firework.setLife(0);
+                livingEntity.remove();
             }
         }
-//        if (entity.getHeight() - e.getDamage() < 0) {
-//            p.teleport(new Location(e.getEntity().getWorld(), 0.0, -400.0, 0.0));
-//        }
-        return;
     }
 
     @EventHandler
-    public void onArrowHit(ProjectileHitEvent event) {
-        Bukkit.broadcastMessage(ChatColor.YELLOW + "FIREBALL HIT");
-        Fireball fire = (Fireball) event.getEntity();
-        LivingEntity entity = (LivingEntity) event.getHitEntity();
-        Player taker = (Player) event.getHitEntity();
-        Player shooter = (Player) fire.getShooter();
-        if (entity != null) {entity.setHealth(0);}
-        if (taker == null) {return;}
-        onPlayerExploded(taker, shooter);
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        Entity entity = event.getEntity();
+        Bukkit.broadcastMessage(ChatColor.RED + "Get entity");
+        if (entity instanceof Player) {
+            Player player = (Player) entity;
+            if (event.getDamage() < player.getHealth()) {return;}
+//            if (candyWarCommand.isRun()) {player.teleport(new Location(entity.getWorld(), 9000, 90, 0));}
+            Player taker = (Player) event.getEntity();
+            Player shooter = (Player) event.getDamager();
+            onPlayerDied(taker, shooter);
+//            int damageTaskId = Bukkit.getScheduler().runTaskTimer(MazeTour.getInstance(), new Runnable() {
+//                int time = 10;
+//                @Override
+//                public void run() {
+//                    if (time == 0) {
+//                        player.setGameMode(GameMode.ADVENTURE);
+//                        Bukkit.getScheduler().cancelTask(taskId);
+//                    }
+//                    time--;
+//                }
+//            }, 0,20L).getTaskId();
+        }
     }
 
-    public void onPlayerExploded(Player taker, Player shooter) {
-        if (shooter == taker) {
-            taker.sendTitle(ChatColor.RED + "СМЕРТЬ", "");
-            taker.sendMessage( ChatColor.RED + "Вы убили самого себя!");
-            taker.playSound(taker.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1, 1);
-            return;
+    @EventHandler
+    public void onFireBallHit(ProjectileHitEvent event) {
+        Fireball fire = (Fireball) event.getEntity();
+        Entity entity = event.getEntity();
+        LivingEntity livingEntity = null;
+        if (entity instanceof LivingEntity) {
+            livingEntity = (LivingEntity) entity;
+    }
+        Player taker = (Player) event.getHitEntity();
+        Player shooter = (Player) fire.getShooter();
+        if (livingEntity != null && !(livingEntity instanceof Player)) {livingEntity.setHealth(0);}
+        onPlayerDied(taker, shooter);
+    }
+
+    public void onPlayerDied(Player taker, Player shooter) {
+        Bukkit.broadcastMessage(ChatColor.RED + "OnPlayerDied");
+        if (taker == null) {return;}
+        if (candyWarCommand.isRun()) {
+            Location location = new Location(getWorld("world"), 3000, 90, 0);
+            taker.teleport(location);
+            if (shooter == null) {
+                taker.sendTitle(ChatColor.RED + "СМЕРТЬ", "");
+                taker.sendMessage( ChatColor.RED + "Вы погибли");
+                taker.playSound(taker.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1, 1);
+                return;
+            }
+            else if (shooter == taker) {
+                taker.sendTitle(ChatColor.RED + "СМЕРТЬ", "");
+                taker.sendMessage( ChatColor.RED + "Вы убили самого себя!");
+                taker.playSound(taker.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1, 1);
+                return;
+            }
+            else {
+                shooter.sendMessage(ChatColor.RED + "Вы убили " + ChatColor.RED + taker.getName());
+                shooter.playSound(taker.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_TWINKLE, 1, 1);
+                taker.sendTitle(ChatColor.RED + "СМЕРТЬ", "");
+                taker.sendMessage(ChatColor.RED + "Вы были убиты " + ChatColor.RED + shooter.getName());
+                taker.playSound(taker.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1, 1);
+                changeCandies(shooter.getInventory(), 1);
+                changeCandies(taker.getInventory(), -1);
+            }
         }
-        shooter.sendMessage( ChatColor.RED + "Вы убили " + ChatColor.RED + taker.getName());
-        shooter.playSound(taker.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_TWINKLE, 1, 1);
-        taker.sendTitle(ChatColor.RED + "СМЕРТЬ", "");
-        taker.sendMessage( ChatColor.RED + "Вы были убиты " + ChatColor.RED + shooter.getName());
-        taker.playSound(taker.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1, 1);
-        changeCandies(shooter.getInventory(), 1);
-        changeCandies(taker.getInventory(), -1);
     }
 
     public void changeCandies(Inventory inventory, int amount) {
@@ -180,7 +224,10 @@ public final class MazeTour extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerMessage(PlayerChatEvent event) {
-        event.setFormat("%s: %s");
+        if (candyWarCommand.isRun()) {event.setCancelled(true); event.getPlayer().sendMessage(ChatColor.RED + "Во время испытания чат отключен!");}
+        else {
+            event.setFormat("%s: %s");
+        }
     }
 
     @EventHandler
@@ -192,9 +239,16 @@ public final class MazeTour extends JavaPlugin implements Listener {
     }
 
     //CANDY WAR ←
+    @EventHandler
+    public void entityDeathEvent(EntityDeathEvent event) {
+        event.setDroppedExp(0);
+        for (Object itemStack: event.getDrops().toArray()) {
+            event.getDrops().remove(itemStack);
+        }
+    }
 
     @EventHandler
-    public void onDeath(PlayerDeathEvent e)
+    public void onPlayerDeath(PlayerDeathEvent e)
     {
         e.setDeathMessage(null);
     }
@@ -206,6 +260,11 @@ public final class MazeTour extends JavaPlugin implements Listener {
                 event.setCancelled(true);
             }
         }
+    }
+
+    @EventHandler
+    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+        event.setCancelled(true);
     }
 
     public static World getWorld(String name) {

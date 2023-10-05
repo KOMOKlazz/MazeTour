@@ -93,6 +93,7 @@ public class candyWarCommand implements CommandExecutor {
             case "stop":
                 if (!run) {sender.sendMessage(ChatColor.RED + "Испытание и так не работает. Тебе нечего останавливать!"); break;}
                 run = false;
+                sender.sendMessage(ChatColor.RED + "Испытание остановлено");
                 break;
         }
         return false;
