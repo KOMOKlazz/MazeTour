@@ -33,7 +33,7 @@ public class boatRaceCommand implements CommandExecutor {
                     break;
                 }
                 run = true;
-                World world = (World) Bukkit.getServer().getWorld("world");
+                World world = (World) Bukkit.getServer().getWorld("mountains");
                 Bukkit.broadcastMessage(ChatColor.YELLOW + "Другое испытание начнется через 30 секунд!");
                 taskId = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
                     int time = 0;
@@ -45,8 +45,8 @@ public class boatRaceCommand implements CommandExecutor {
                                                   //  Bukkit.broadcastMessage(ChatColor.YELLOW + "Перемещение на другое испытание через 10 секунд!");
                                                     //break;
                             case 0:
-                                World world = (World) Bukkit.getServer().getWorld("world");
-                                Location location = new Location(world, 1500, 63, 0);
+                                World world = (World) Bukkit.getServer().getWorld("mountains");
+                                Location location = new Location(world, 0, 90, 0);
                                 for (Player player : Bukkit.getOnlinePlayers()) {
                                     player.teleport(location);
                                 }
@@ -71,7 +71,7 @@ public class boatRaceCommand implements CommandExecutor {
                                 break;
                             case 20:
                                 for (Player player : Bukkit.getOnlinePlayers()) {
-                                    Location boatRaceStartLocation = new Location(MazeTour.getWorld("world"), -3000, 100, 0);
+                                    Location boatRaceStartLocation = new Location(MazeTour.getWorld("mountains"), 0, 90, 0);
                                     Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
                                     boat.addPassenger(player);
                                     player.sendTitle(ChatColor.RED + "Старт", "");
@@ -85,9 +85,13 @@ public class boatRaceCommand implements CommandExecutor {
                         time++;
                     }
                 }, 0, 20L).getTaskId();
+            case "stop":
+                if (!run) {sender.sendMessage(ChatColor.RED + "Испытание и так не работает. Тебе нечего останавливать!"); break;}
+                run = false;
+                sender.sendMessage(ChatColor.RED + "Испытание остановлено");
+                break;
         }
-       World boatRaceWorld = Bukkit.getServer().getWorld("boat_race");
-        Location boatRaceStartLocation = new Location(boatRaceWorld, 0, 100, 0);
+
                 return false;
 
     }
