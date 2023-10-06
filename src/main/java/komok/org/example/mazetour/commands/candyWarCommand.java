@@ -84,6 +84,10 @@ public class candyWarCommand implements CommandExecutor {
                                     player.playSound(player.getLocation(), Sound.ENTITY_WITCH_CELEBRATE, 1, 1);
                                     run = true;
                                 }
+                            case 100:
+                                for (Player player: Bukkit.getOnlinePlayers()) {
+                                    player.playSound(player.getLocation(), Sound.MUSIC_DISC_13, 1, 1);
+                                }
                                 break;
                         }
                         time++;
