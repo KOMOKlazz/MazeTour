@@ -75,20 +75,17 @@ public class candyWarCommand implements CommandExecutor {
                                     Location chestLocation = new Location(world, -100, 300, 0);
                                     Chest chest = (Chest) chestLocation.getBlock().getState();
                                     ItemStack brush = chest.getInventory().getItem(0);
+                                    ItemStack feather = chest.getInventory().getItem(1);
                                     ItemStack candies = chest.getInventory().getItem(4);
                                     Inventory takerInventory = player.getInventory();
                                     takerInventory.setItem(0, brush);
+                                    takerInventory.setItem(1, feather);
                                     takerInventory.setItem(4, candies);
                                     player.sendTitle(ChatColor.RED + "Старт", "");
                                     player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
                                     player.playSound(player.getLocation(), Sound.ENTITY_WITCH_CELEBRATE, 1, 1);
                                     run = true;
                                 }
-                            case 100:
-                                for (Player player: Bukkit.getOnlinePlayers()) {
-                                    player.playSound(player.getLocation(), Sound.MUSIC_DISC_13, 1, 1);
-                                }
-                                break;
                         }
                         time++;
                     }
@@ -102,7 +99,6 @@ public class candyWarCommand implements CommandExecutor {
         }
         return false;
     }
-
     private void cancelTask(int taskId) {
         Bukkit.getScheduler().cancelTask(this.taskId);
     }

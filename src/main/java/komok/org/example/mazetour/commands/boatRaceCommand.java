@@ -34,21 +34,45 @@ public class boatRaceCommand implements CommandExecutor {
                 }
                 run = true;
                 World world = (World) Bukkit.getServer().getWorld("mountains");
-                Bukkit.broadcastMessage(ChatColor.YELLOW + "Другое испытание начнется через 30 секунд!");
+                Bukkit.broadcastMessage(ChatColor.RED + "Лодочные гонки " + ChatColor.YELLOW + "через 30 секунд!");
                 taskId = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
                     int time = 0;
 
                     @Override
                     public void run() {
+                        if (run == false) {
+                            cancelTask(taskId);
+                        }
                         switch (time) {
-                                                //case 20:
-                                                  //  Bukkit.broadcastMessage(ChatColor.YELLOW + "Перемещение на другое испытание через 10 секунд!");
-                                                    //break;
                             case 0:
                                 World world = (World) Bukkit.getServer().getWorld("mountains");
-                                Location location = new Location(world, 0, 90, 0);
+                                Location location = new Location(world, -37, 145, 186);
                                 for (Player player : Bukkit.getOnlinePlayers()) {
                                     player.teleport(location);
+                                }
+                                break;
+                            case 10:
+                                //Спавн лодок
+                                int x = 1;
+                                int z = 0;
+                                for (Player player : Bukkit.getOnlinePlayers()) {
+                                    Location boatRaceStartLocation = new Location(MazeTour.getWorld("mountains"), -40 + x, 145, 180 + z);
+                                    player.teleport(boatRaceStartLocation);
+                                    Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
+                                    boat.addPassenger(player);
+
+                                    //Выдача предметов
+                                    Location chestLocation = new Location(MazeTour.getWorld("mountains"), -100, 300, 0);
+                                    Chest chest = (Chest) chestLocation.getBlock().getState();
+                                    ItemStack redWool = chest.getInventory().getItem(4);
+                                    Inventory takerInventory = player.getInventory();
+                                    takerInventory.setItem(4, redWool);
+
+                                    //Визуал
+                                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
+                                    player.playSound(player.getLocation(), Sound.ITEM_AXE_SCRAPE, 1, 1);
+                                    if (x < 5) {x += 2;}
+                                    else {x = 0;}
                                 }
                                 break;
                             case 17:
@@ -69,22 +93,11 @@ public class boatRaceCommand implements CommandExecutor {
                                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
                                 }
                                 break;
-                            case 20:
-                                for (Player player : Bukkit.getOnlinePlayers()) {
-                                    Location boatRaceStartLocation = new Location(MazeTour.getWorld("mountains"), 0, 90, 0);
-                                    Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
-                                    boat.addPassenger(player);
-                                    player.sendTitle(ChatColor.RED + "Старт", "");
-
-                                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
-                                    player.playSound(player.getLocation(), Sound.ENTITY_WITCH_CELEBRATE, 1, 1);
-                                    run = true;
-                                }
-                                break;
                         }
                         time++;
                     }
                 }, 0, 20L).getTaskId();
+                break;
             case "stop":
                 if (!run) {sender.sendMessage(ChatColor.RED + "Испытание и так не работает. Тебе нечего останавливать!"); break;}
                 run = false;
@@ -92,8 +105,25 @@ public class boatRaceCommand implements CommandExecutor {
                 break;
         }
 
-                return false;
-
+        return false;
     }
-}
+    public static void teleportToStart(Player player) {
+        //Телепорт
+        Location boatRaceStartLocation = new Location(MazeTour.getWorld("mountains"), -37, 150, 185);
+        try {
+            player.getVehicle().remove();
+        } catch (Exception exception) {}
+        player.teleport(boatRaceStartLocation);
+        Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
+        boat.addPassenger(player);
 
+        //Визуал
+        player.sendMessage(ChatColor.RED + "Вы были перемещены на старт");
+        player.playSound(player.getLocation(), Sound.ENTITY_ENDER_EYE_LAUNCH, 1, 1);
+    }
+    private void cancelTask(int taskId) {
+        Bukkit.getScheduler().cancelTask(this.taskId);
+    }
+
+    ///give KOMOKgg red_wool{display:{Name:'{"text":"На старт","color":"red","italic":"false"}'}}
+}
