@@ -12,6 +12,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 
 public class boatRaceCommand implements CommandExecutor {
     private Plugin plugin = MazeTour.getInstance();
@@ -32,7 +36,14 @@ public class boatRaceCommand implements CommandExecutor {
                     sender.sendMessage(ChatColor.RED + "Испытание уже начато!");
                     break;
                 }
+
                 run = true;
+                ScoreboardManager manager = Bukkit.getScoreboardManager();
+                Scoreboard board = manager.getNewScoreboard();
+                Objective objective = board.registerNewObjective("test", "dummy");
+                objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+                objective.setDisplayName("scoreboard");
+                // Scoreboard
                 World world = (World) Bukkit.getServer().getWorld("mountains");
                 Bukkit.broadcastMessage(ChatColor.RED + "Лодочные гонки " + ChatColor.YELLOW + "через 30 секунд!");
                 taskId = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
@@ -127,3 +138,4 @@ public class boatRaceCommand implements CommandExecutor {
 
     ///give KOMOKgg red_wool{display:{Name:'{"text":"На старт","color":"red","italic":"false"}'}}
 }
+

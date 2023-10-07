@@ -17,18 +17,25 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.Vector;
 
 public final class MazeTour extends JavaPlugin implements Listener {
     private int taskId;
     private int damageTaskId;
     private static MazeTour instance;
+
     public MazeTour() {
         instance = this;
     }
+
     public static Plugin getInstance() {
         return instance;
     }
+
     @Override
     public void onEnable() {
         getCommand("boatrace").setExecutor(new boatRaceCommand());
@@ -51,8 +58,7 @@ public final class MazeTour extends JavaPlugin implements Listener {
             player.setGameMode(GameMode.SPECTATOR);
             Location location = new Location(getWorld("world"), 3000, 80, 0);
             player.teleport(location);
-        }
-        else {
+        } else {
             player.setGameMode(GameMode.ADVENTURE);
             player.sendMessage(ChatColor.GOLD + "Добро пожаловать на хеллоуинский турнир 2023!");
             player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
@@ -81,7 +87,7 @@ public final class MazeTour extends JavaPlugin implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerUse(PlayerInteractEvent event){
+    public void onPlayerUse(PlayerInteractEvent event) {
         if (candyWarCommand.isRun()) {
             Player player = event.getPlayer();
 
@@ -128,9 +134,11 @@ public final class MazeTour extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler (priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (candyWarCommand.isRun()) {event.setCancelled(true);}
+        if (candyWarCommand.isRun()) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
@@ -165,20 +173,22 @@ public final class MazeTour extends JavaPlugin implements Listener {
         Entity entity = event.getEntity();
         if (entity instanceof Player) {
             Player player = (Player) entity;
-            if (event.getDamage() < player.getHealth()) {return;}
+            if (event.getDamage() < player.getHealth()) {
+                return;
+            }
             Player taker = (Player) event.getEntity();
             Player shooter = (Player) event.getDamager();
             onPlayerDied(taker, shooter);
         }
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onFireBallHit(ProjectileHitEvent event) {
         Entity entity = event.getEntity();
         LivingEntity livingEntity = null;
         if (entity instanceof LivingEntity) {
             livingEntity = (LivingEntity) entity;
-    }
+        }
         Player taker = null;
         Player shooter = null;
         try {
@@ -192,27 +202,29 @@ public final class MazeTour extends JavaPlugin implements Listener {
         } catch (Exception exception) {
             shooter = null;
         }
-        if (livingEntity != null && !(livingEntity instanceof Player)) {livingEntity.setHealth(0);}
+        if (livingEntity != null && !(livingEntity instanceof Player)) {
+            livingEntity.setHealth(0);
+        }
         onPlayerDied(taker, shooter);
     }
 
     public void onPlayerDied(Player taker, Player shooter) {
-        if (taker == null) {return;}
+        if (taker == null) {
+            return;
+        }
         if (candyWarCommand.isRun()) {
             Location location = new Location(getWorld("world"), 3000, 90, 0);
             taker.teleport(location);
             taker.setGameMode(GameMode.SPECTATOR);
             if (shooter == null) {
                 taker.sendTitle(ChatColor.RED + "СМЕРТЬ", "");
-                taker.sendMessage( ChatColor.RED + "Вы погибли");
+                taker.sendMessage(ChatColor.RED + "Вы погибли");
                 taker.playSound(taker.getLocation(), Sound.ENTITY_PLAYER_BURP, 1, 1);
-            }
-            else if (shooter == taker) {
+            } else if (shooter == taker) {
                 taker.sendTitle(ChatColor.RED + "СМЕРТЬ", "");
-                taker.sendMessage( ChatColor.RED + "Вы убили самого себя!");
+                taker.sendMessage(ChatColor.RED + "Вы убили самого себя!");
                 taker.playSound(taker.getLocation(), Sound.ENTITY_PLAYER_BURP, 1, 1);
-            }
-            else {
+            } else {
                 shooter.sendMessage(ChatColor.RED + "Вы убили " + ChatColor.RED + taker.getName());
                 shooter.playSound(taker.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_TWINKLE, 1, 1);
                 taker.sendTitle(ChatColor.RED + "СМЕРТЬ", "");
@@ -223,6 +235,7 @@ public final class MazeTour extends JavaPlugin implements Listener {
             }
             damageTaskId = Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
                 int time = 10;
+
                 @Override
                 public void run() {
                     if (time == 0) {
@@ -267,29 +280,40 @@ public final class MazeTour extends JavaPlugin implements Listener {
     @EventHandler
     public void playerLeaveBoat(VehicleExitEvent event) {
         Player player = (Player) event.getExited();
-        if (!boatRaceCommand.isRun() || player.isOp()) {return;}
+        if (!boatRaceCommand.isRun() || player.isOp()) {
+            return;
+        }
         event.setCancelled(true);
     }
+
     @EventHandler
     public void playerBreakBoat(VehicleDamageEvent event) {
         Player player = (Player) event.getAttacker();
-        if (!boatRaceCommand.isRun() || player.isOp()) {return;}
+        if (!boatRaceCommand.isRun() || player.isOp()) {
+            return;
+        }
         event.setCancelled(true);
     }
+
     @EventHandler
     public void playerJoinBoat(VehicleEnterEvent event) {
-        if (!boatRaceCommand.isRun()) {return;}
+        if (!boatRaceCommand.isRun()) {
+            return;
+        }
         Boat boat = (Boat) event.getVehicle();
         if (boat.getPassengers().size() == 1) {
             event.setCancelled(true);
         }
     }
+
     @EventHandler
     public void playerCollisionBoat(VehicleEntityCollisionEvent event) {
         Bukkit.broadcastMessage("рандомVVVVV");
         Player player = (Player) event.getVehicle().getPassengers().get(0);
         player.sendMessage("рандом");
-        if (!boatRaceCommand.isRun()) {return;}
+        if (!boatRaceCommand.isRun()) {
+            return;
+        }
 //        Block block = event.getBlock();
         Entity entity = event.getEntity();
 //        if (block.getType() == Material.BLACK_CONCRETE) {
@@ -310,41 +334,47 @@ public final class MazeTour extends JavaPlugin implements Listener {
 
         }
     }
+
     //BOAT RACE ←
     @EventHandler
     public void PlayerDropItem(PlayerDropItemEvent event) {
-        if(candyWarCommand.isRun() || event.getItemDrop().getItemStack().getType() == Material.BRUSH ||
+        if (candyWarCommand.isRun() || event.getItemDrop().getItemStack().getType() == Material.BRUSH ||
                 event.getItemDrop().getItemStack().getType() == Material.PLAYER_HEAD) {
             event.setCancelled(true);
         }
-        if(boatRaceCommand.isRun() || event.getItemDrop().getItemStack().getType() == Material.RED_WOOL) {
+        if (boatRaceCommand.isRun() || event.getItemDrop().getItemStack().getType() == Material.RED_WOOL) {
             event.setCancelled(true);
         }
     }
+
     @EventHandler
     public void onPlayerMessage(PlayerChatEvent event) {
-        if (candyWarCommand.isRun()) {event.setCancelled(true); onPlayerDied(event.getPlayer(), event.getPlayer()); event.getPlayer().sendMessage(ChatColor.RED + "Во время испытания чат отключен!");}
-        else {
+        if (candyWarCommand.isRun()) {
+            event.setCancelled(true);
+            onPlayerDied(event.getPlayer(), event.getPlayer());
+            event.getPlayer().sendMessage(ChatColor.RED + "Во время испытания чат отключен!");
+        } else {
             event.setFormat("%s: %s");
         }
     }
+
     @EventHandler
     public void entityDeathEvent(EntityDeathEvent event) {
         event.setDroppedExp(0);
-        for (Object itemStack: event.getDrops().toArray()) {
+        for (Object itemStack : event.getDrops().toArray()) {
             event.getDrops().remove(itemStack);
         }
     }
+
     @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent e)
-    {
+    public void onPlayerDeath(PlayerDeathEvent e) {
         e.setDeathMessage(null);
     }
 
     @EventHandler
     public void onFall(EntityDamageEvent event) {
         if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
-            if(event.getEntityType()==EntityType.PLAYER) {
+            if (event.getEntityType() == EntityType.PLAYER) {
                 event.setCancelled(true);
             }
         }
@@ -362,4 +392,16 @@ public final class MazeTour extends JavaPlugin implements Listener {
     private void cancelTask(int taskId) {
         Bukkit.getScheduler().cancelTask(this.taskId);
     }
+
+
+    public void Scoreboard(boolean Scoreboard) {
+        if (boatRaceCommand.isRun()) {
+
+        }else {
+            ScoreboardManager manager = Bukkit.getScoreboardManager();
+            Scoreboard board = manager.getNewScoreboard();
+        }
+
+    }
+
 }
