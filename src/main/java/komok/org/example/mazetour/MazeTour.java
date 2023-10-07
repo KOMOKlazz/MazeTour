@@ -300,6 +300,16 @@ public final class MazeTour extends JavaPlugin implements Listener {
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
         }
     }
+
+    @EventHandler
+    public void playerColissionBlock(VehicleBlockCollisionEvent event) {
+        Bukkit.broadcastMessage("оооооо");
+        Block block = event.getBlock();
+        if (block.getType() == Material.BLACK_CONCRETE) {
+            Bukkit.broadcastMessage("fghjkl");
+
+        }
+    }
     //BOAT RACE ←
     @EventHandler
     public void PlayerDropItem(PlayerDropItemEvent event) {
