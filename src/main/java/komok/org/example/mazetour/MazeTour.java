@@ -11,9 +11,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
-import org.bukkit.event.vehicle.VehicleDamageEvent;
-import org.bukkit.event.vehicle.VehicleDestroyEvent;
-import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.event.vehicle.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -277,6 +275,30 @@ public final class MazeTour extends JavaPlugin implements Listener {
         Player player = (Player) event.getAttacker();
         if (!boatRaceCommand.isRun() || player.isOp()) {return;}
         event.setCancelled(true);
+    }
+    @EventHandler
+    public void playerJoinBoat(VehicleEnterEvent event) {
+        if (!boatRaceCommand.isRun()) {return;}
+        Boat boat = (Boat) event.getVehicle();
+        if (boat.getPassengers().size() == 1) {
+            event.setCancelled(true);
+        }
+    }
+    @EventHandler
+    public void playerCollisionBoat(VehicleEntityCollisionEvent event) {
+        Bukkit.broadcastMessage("рандомVVVVV");
+        Player player = (Player) event.getVehicle().getPassengers().get(0);
+        player.sendMessage("рандом");
+        if (!boatRaceCommand.isRun()) {return;}
+//        Block block = event.getBlock();
+        Entity entity = event.getEntity();
+//        if (block.getType() == Material.BLACK_CONCRETE) {
+        if (entity.getType() == EntityType.MINECART) {
+            player.sendMessage("конкрете");
+            Location location = new Location(MazeTour.getWorld("mountains"), -368, 160, 159);
+            player.teleport(location);
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
+        }
     }
     //BOAT RACE ←
     @EventHandler
