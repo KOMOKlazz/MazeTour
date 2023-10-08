@@ -38,12 +38,13 @@ public class boatRaceCommand implements CommandExecutor {
                 }
 
                 run = true;
+                // Скорборд
                 ScoreboardManager manager = Bukkit.getScoreboardManager();
                 Scoreboard board = manager.getNewScoreboard();
                 Objective objective = board.registerNewObjective("test", "dummy");
                 objective.setDisplaySlot(DisplaySlot.SIDEBAR);
                 objective.setDisplayName("scoreboard");
-                // Scoreboard
+                // Тп в мир
                 World world = (World) Bukkit.getServer().getWorld("mountains");
                 Bukkit.broadcastMessage(ChatColor.RED + "Лодочные гонки " + ChatColor.YELLOW + "через 30 секунд!");
                 taskId = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
@@ -131,6 +132,20 @@ public class boatRaceCommand implements CommandExecutor {
         //Визуал
         player.sendMessage(ChatColor.RED + "Вы были перемещены на старт");
         player.playSound(player.getLocation(), Sound.ENTITY_ENDER_EYE_LAUNCH, 1, 1);
+    }
+
+    public static void teleportToLocation(Player player, double x, double y, double z) {
+        //Телепорт
+        Location boatRaceStartLocation = new Location(MazeTour.getWorld("mountains"), x, y, z);
+        try {
+            player.getVehicle().remove();
+        } catch (Exception exception) {}
+        player.teleport(boatRaceStartLocation);
+        Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
+        boat.addPassenger(player);
+
+        //Визуал
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
     }
     private void cancelTask(int taskId) {
         Bukkit.getScheduler().cancelTask(this.taskId);

@@ -3,11 +3,13 @@ package komok.org.example.mazetour;
 import komok.org.example.mazetour.commands.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
@@ -22,6 +24,8 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.Vector;
+
+import java.io.File;
 
 public final class MazeTour extends JavaPlugin implements Listener {
     private int taskId;
@@ -43,9 +47,27 @@ public final class MazeTour extends JavaPlugin implements Listener {
         getCommand("candywars").setTabCompleter(new candyWarCompliter());
         getCommand("world").setExecutor(new worldCommand());
         getServer().getPluginManager().registerEvents(this, this);
+
+        if (!getInstance().getDataFolder().exists()) {
+            getInstance().getDataFolder().mkdir();
+        }
+        File messagesFolder = new File(getInstance().getDataFolder(), "messages");
+        if(!messagesFolder.exists()) {
+            messagesFolder.mkdirs();
+            File file = new File(getInstance().getDataFolder(), "players.yml");
+            file.mkdir();
+            File fileSave = new File(instance.getDataFolder(), "players.yml");
+            try {
+                YamlConfiguration yaml = new YamlConfiguration();
+                yaml.set("path", 1);
+
+                yaml.save(fileSave);
+
+            }catch(Exception ex){ex.printStackTrace();}
+        }
+
         System.out.println(ChatColor.RED + "MazeTour launched!");
     }
-
     @Override
     public void onDisable() {
         System.out.println("MazeTour stopped!");
@@ -54,6 +76,27 @@ public final class MazeTour extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = (Player) event.getPlayer();
+
+        Integer i = 0;
+        File fileGet = new File(instance.getDataFolder(), "players.yml");
+        try{
+
+            YamlConfiguration yaml = new YamlConfiguration();
+            yaml.load(fileGet);
+
+            i = (Integer) yaml.get("path");
+
+        }catch(Exception ex){ex.printStackTrace();}
+        Bukkit.broadcastMessage(i + "очков");
+        File fileSave = new File(instance.getDataFolder(), "players.yml");
+        try {
+            YamlConfiguration yaml = new YamlConfiguration();
+            yaml.set("path", i + 1);
+
+            yaml.save(fileSave);
+
+        }catch(Exception ex){ex.printStackTrace();}
+
         if (candyWarCommand.isRun()) {
             player.setGameMode(GameMode.SPECTATOR);
             Location location = new Location(getWorld("world"), 3000, 80, 0);
@@ -308,32 +351,30 @@ public final class MazeTour extends JavaPlugin implements Listener {
 
     @EventHandler
     public void playerCollisionBoat(VehicleEntityCollisionEvent event) {
-        Bukkit.broadcastMessage("рандомVVVVV");
-        Player player = (Player) event.getVehicle().getPassengers().get(0);
-        player.sendMessage("рандом");
+        Boat boat;
+        Player player;
+        try {
+            boat = (Boat) event.getVehicle();
+            player = (Player) boat.getPassengers().get(0);
+        } catch (Exception exception) {return;}
         if (!boatRaceCommand.isRun()) {
             return;
         }
-//        Block block = event.getBlock();
         Entity entity = event.getEntity();
+        if (entity.getType() == EntityType.MINECART_HOPPER) {
+            boatRaceCommand.teleportToLocation(player, -368, 160, 159);
+        }
+    }
+
+//    @EventHandler
+//    public void playerColissionBlock(VehicleBlockCollisionEvent event) {
+//        Bukkit.broadcastMessage("оооооо");
+//        Block block = event.getBlock();
 //        if (block.getType() == Material.BLACK_CONCRETE) {
-        if (entity.getType() == EntityType.MINECART) {
-            player.sendMessage("конкрете");
-            Location location = new Location(MazeTour.getWorld("mountains"), -368, 160, 159);
-            player.teleport(location);
-            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
-        }
-    }
-
-    @EventHandler
-    public void playerColissionBlock(VehicleBlockCollisionEvent event) {
-        Bukkit.broadcastMessage("оооооо");
-        Block block = event.getBlock();
-        if (block.getType() == Material.BLACK_CONCRETE) {
-            Bukkit.broadcastMessage("fghjkl");
-
-        }
-    }
+//            Bukkit.broadcastMessage("fghjkl");
+//
+//        }
+//    }
 
     //BOAT RACE ←
     @EventHandler
@@ -379,10 +420,16 @@ public final class MazeTour extends JavaPlugin implements Listener {
             }
         }
     }
-
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
         event.setCancelled(true);
+    }
+    @EventHandler
+    public void onIceMelt(BlockFadeEvent event) {
+        Block affectedBlock = event.getBlock();
+        if (affectedBlock.getType() == Material.ICE) {
+            event.setCancelled(true);
+        }
     }
 
     public static World getWorld(String name) {
