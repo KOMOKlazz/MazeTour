@@ -350,7 +350,7 @@ public final class MazeTour extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void playerCollisionBoat(VehicleEntityCollisionEvent event) {
+    public void boatEntityCollision(VehicleEntityCollisionEvent event) {
         Boat boat;
         Player player;
         try {
@@ -363,6 +363,9 @@ public final class MazeTour extends JavaPlugin implements Listener {
         Entity entity = event.getEntity();
         if (entity.getType() == EntityType.MINECART_HOPPER) {
             boatRaceCommand.teleportToLocation(player, -368, 160, 159);
+        }
+        if (entity.getType() == EntityType.MINECART) {
+            boatRaceCommand.teleportToLocation(player, -760, 103, 196);
         }
     }
 
