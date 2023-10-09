@@ -19,13 +19,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.Vector;
 
 import java.io.File;
+import java.sql.SQLException;
 
 public final class MazeTour extends JavaPlugin implements Listener {
     private int taskId;
@@ -39,34 +38,24 @@ public final class MazeTour extends JavaPlugin implements Listener {
     public static Plugin getInstance() {
         return instance;
     }
-
     @Override
     public void onEnable() {
+        Database db = new Database();
+        try {
+            db.initializeDatabase();
+            getServer().getConsoleSender().sendMessage("[MazeTour]" + ChatColor.GREEN + "Successfully connected to the database");
+        } catch (SQLException e) {
+            getServer().getConsoleSender().sendMessage("[MazeTour]" + ChatColor.RED + "Unable to connect to the database or create the tables!");
+            throw new RuntimeException(e);
+        }
+
         getCommand("boatrace").setExecutor(new boatRaceCommand());
         getCommand("candywars").setExecutor(new candyWarCommand());
         getCommand("candywars").setTabCompleter(new candyWarCompliter());
         getCommand("world").setExecutor(new worldCommand());
         getServer().getPluginManager().registerEvents(this, this);
 
-        if (!getInstance().getDataFolder().exists()) {
-            getInstance().getDataFolder().mkdir();
-        }
-        File messagesFolder = new File(getInstance().getDataFolder(), "messages");
-        if(!messagesFolder.exists()) {
-            messagesFolder.mkdirs();
-            File file = new File(getInstance().getDataFolder(), "players.yml");
-            file.mkdir();
-            File fileSave = new File(instance.getDataFolder(), "players.yml");
-            try {
-                YamlConfiguration yaml = new YamlConfiguration();
-                yaml.set("path", 1);
-
-                yaml.save(fileSave);
-
-            }catch(Exception ex){ex.printStackTrace();}
-        }
-
-        System.out.println(ChatColor.RED + "MazeTour launched!");
+        getServer().getConsoleSender().sendMessage("[MazeTour]" + ChatColor.GREEN + "Launched");
     }
     @Override
     public void onDisable() {
@@ -351,21 +340,25 @@ public final class MazeTour extends JavaPlugin implements Listener {
 
     @EventHandler
     public void boatEntityCollision(VehicleEntityCollisionEvent event) {
-        Boat boat;
-        Player player;
-        try {
-            boat = (Boat) event.getVehicle();
-            player = (Player) boat.getPassengers().get(0);
-        } catch (Exception exception) {return;}
-        if (!boatRaceCommand.isRun()) {
-            return;
-        }
-        Entity entity = event.getEntity();
-        if (entity.getType() == EntityType.MINECART_HOPPER) {
-            boatRaceCommand.teleportToLocation(player, -368, 160, 159);
-        }
-        if (entity.getType() == EntityType.MINECART) {
-            boatRaceCommand.teleportToLocation(player, -760, 103, 196);
+        if (boatRaceCommand.isRun()) {
+            Boat boat;
+            Player player;
+            try {
+                boat = (Boat) event.getVehicle();
+                player = (Player) boat.getPassengers().get(0);
+            } catch (Exception exception) {
+                return;
+            }
+            if (!boatRaceCommand.isRun()) {
+                return;
+            }
+            Entity entity = event.getEntity();
+            if (entity.getType() == EntityType.MINECART_HOPPER) {
+                boatRaceCommand.teleportToLocation(player, -368, 160, 159);
+            }
+            if (entity.getType() == EntityType.MINECART) {
+                boatRaceCommand.teleportToLocation(player, -688, 145, 156);
+            }
         }
     }
 

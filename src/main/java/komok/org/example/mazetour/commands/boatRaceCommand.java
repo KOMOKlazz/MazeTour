@@ -57,10 +57,8 @@ public class boatRaceCommand implements CommandExecutor {
                         }
                         switch (time) {
                             case 0:
-                                World world = (World) Bukkit.getServer().getWorld("mountains");
-                                Location location = new Location(world, -37, 145, 186);
                                 for (Player player : Bukkit.getOnlinePlayers()) {
-                                    player.teleport(location);
+                                    teleportToStart(player);
                                 }
                                 break;
                             case 10:
@@ -122,6 +120,7 @@ public class boatRaceCommand implements CommandExecutor {
     public static void teleportToStart(Player player) {
         //Телепорт
         Location boatRaceStartLocation = new Location(MazeTour.getWorld("mountains"), -37, 150, 185);
+        boatRaceStartLocation.setPitch(-180);
         try {
             player.getVehicle().remove();
         } catch (Exception exception) {}
