@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scoreboard.*;
 
 public class candyWarCommand implements CommandExecutor {
     private Plugin plugin = MazeTour.getInstance();
@@ -32,6 +33,7 @@ public class candyWarCommand implements CommandExecutor {
                 run = true;
                 World world = (World) Bukkit.getServer().getWorld("world");
                 Bukkit.broadcastMessage(ChatColor.RED + "Конфетные войны " + ChatColor.YELLOW + "через 30 секунд!");
+                // Время
                 taskId = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
                     int time = 0;
 
@@ -39,6 +41,9 @@ public class candyWarCommand implements CommandExecutor {
                     public void run() {
                         if (run == false) {
                             cancelTask(taskId);
+                        }
+                        for (Player player: Bukkit.getOnlinePlayers()) {
+                            player.setLevel(1000 - time);
                         }
                         switch (time) {
     //                    case 20: - Вставлю потом
@@ -85,6 +90,7 @@ public class candyWarCommand implements CommandExecutor {
                                     player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
                                     player.playSound(player.getLocation(), Sound.ENTITY_WITCH_CELEBRATE, 1, 1);
                                     run = true;
+                                    break;
                                 }
                         }
                         time++;

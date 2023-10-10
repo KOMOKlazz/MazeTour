@@ -1,6 +1,7 @@
 package komok.org.example.mazetour.commands;
 
 import komok.org.example.mazetour.MazeTour;
+import komok.org.example.mazetour.utils.BoatRaceFunctions;
 import org.bukkit.*;
 import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
@@ -19,6 +20,7 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 public class boatRaceCommand implements CommandExecutor {
     private Plugin plugin = MazeTour.getInstance();
+    private BoatRaceFunctions boatRaceFunctions = MazeTour.getBoatRaceFunctions();
     private int taskId;
     public static boolean run;
 
@@ -58,7 +60,7 @@ public class boatRaceCommand implements CommandExecutor {
                         switch (time) {
                             case 0:
                                 for (Player player : Bukkit.getOnlinePlayers()) {
-                                    teleportToStart(player);
+                                    boatRaceFunctions.teleportToStart(player);
                                 }
                                 break;
                             case 10:
@@ -66,13 +68,13 @@ public class boatRaceCommand implements CommandExecutor {
                                 int x = 1;
                                 int z = 0;
                                 for (Player player : Bukkit.getOnlinePlayers()) {
-                                    Location boatRaceStartLocation = new Location(MazeTour.getWorld("mountains"), -40 + x, 145, 180 + z);
+                                    Location boatRaceStartLocation = new Location(plugin.getServer().getWorld("mountains"), -40 + x, 145, 180 + z);
                                     player.teleport(boatRaceStartLocation);
                                     Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
                                     boat.addPassenger(player);
 
                                     //Выдача предметов
-                                    Location chestLocation = new Location(MazeTour.getWorld("mountains"), -100, 300, 0);
+                                    Location chestLocation = new Location(plugin.getServer().getWorld("mountains"), -100, 300, 0);
                                     Chest chest = (Chest) chestLocation.getBlock().getState();
                                     ItemStack redWool = chest.getInventory().getItem(4);
                                     Inventory takerInventory = player.getInventory();
@@ -117,35 +119,7 @@ public class boatRaceCommand implements CommandExecutor {
 
         return false;
     }
-    public static void teleportToStart(Player player) {
-        //Телепорт
-        Location boatRaceStartLocation = new Location(MazeTour.getWorld("mountains"), -37, 150, 185);
-        boatRaceStartLocation.setPitch(-180);
-        try {
-            player.getVehicle().remove();
-        } catch (Exception exception) {}
-        player.teleport(boatRaceStartLocation);
-        Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
-        boat.addPassenger(player);
 
-        //Визуал
-        player.sendMessage(ChatColor.RED + "Вы были перемещены на старт");
-        player.playSound(player.getLocation(), Sound.ENTITY_ENDER_EYE_LAUNCH, 1, 1);
-    }
-
-    public static void teleportToLocation(Player player, double x, double y, double z) {
-        //Телепорт
-        Location boatRaceStartLocation = new Location(MazeTour.getWorld("mountains"), x, y, z);
-        try {
-            player.getVehicle().remove();
-        } catch (Exception exception) {}
-        player.teleport(boatRaceStartLocation);
-        Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
-        boat.addPassenger(player);
-
-        //Визуал
-        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1, 2);
-    }
     private void cancelTask(int taskId) {
         Bukkit.getScheduler().cancelTask(this.taskId);
     }

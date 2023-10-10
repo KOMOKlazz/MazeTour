@@ -1,12 +1,12 @@
 package komok.org.example.mazetour.models;
 
-public class CandyWarsDataBase {
+public class CandyWarsStats {
     private String nickname;
     private int candies;
     private int deaths;
     private int kills;
 
-    public CandyWarsDataBase(String nickname, int candies, int deaths, int kills) {
+    public CandyWarsStats(String nickname, int candies, int deaths, int kills) {
         this.nickname = nickname;
         this.candies = candies;
         this.deaths = deaths;

@@ -1,6 +1,7 @@
 package komok.org.example.mazetour;
 
-import komok.org.example.mazetour.models.CandyWarsDataBase;
+import komok.org.example.mazetour.models.CandyWarsStats;
+import org.checkerframework.checker.units.qual.C;
 
 import java.sql.*;
 
@@ -34,8 +35,22 @@ public class Database {
         statement.close();
     }
 
-    public CandyWarsDataBase findPlayerStatsByNickname(String nickname) throws SQLException {
-//        Statement statement = getConnection().createStatement();
+    public CandyWarsStats findPlayerCandyWarsStatsByNickname(String nickname) throws SQLException {
+        Statement statement = getConnection().createStatement();
+        String sql = "SELECT * FROM candy_wars WHERE nickname = " + nickname;
+        ResultSet results = statement.executeQuery(sql);
+
+        if (results.next()) {
+            int candies = results.getInt("candies");
+            int kills = results.getInt("kills");
+            int deaths = results.getInt("deaths");
+            CandyWarsStats candyWarsStats = new CandyWarsStats(nickname, candies, kills, deaths);
+
+            statement.close();
+            return candyWarsStats;
+        }
+
+        statement.close();
         return null;
     }
 }
